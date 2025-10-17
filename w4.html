@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #fff0f5, #ffe4e1);
+            transition: background 2s ease-in-out;
+        }
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+        #love-note-modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        /* Envelope Styles */
+        #envelope {
+            transition: transform 0.5s;
+            position: relative;
+        }
+        #envelope:hover {
+            transform: scale(1.05);
+        }
+        .envelope-back {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            background-color: #f8bbd0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f48fb1, #f06292);
+            clip-path: polygon(0 0, 100% 0, 50% 50%);
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+            border-radius: 8px 8px 0 0;
+        }
+        #envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        .heart {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            color: #e91e63;
+            opacity: 1;
+            transition: opacity 0.4s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #envelope.open .heart {
+            opacity: 0;
+        }
+
+        /* BRILLIANT & REALISTIC Cake Styles */
+        .cake-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            cursor: default;
+        }
+        #cutting-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20; /* Canvas on top for drawing */
+            pointer-events: none;
+        }
+        .knife-cursor {
+            cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMzhMODQgMzRMMzMuMzMzMyA4LjY2NjY3QzM0LjUyMTUgNy40Nzg1MSAzNi4xNDE3IDYuNzkzODIgMzcuODMzMyA2Ljc5MzgyQzM5LjUyNDkgNi4jc5MzgyIDQxLjE0NTIgNy40Nzg1MSA0Mi4zMzMzIDguNjY2NjdDNDMuNTIxNSA5Ljg1NDgyIDQ0LjIwNjIgMTEuNDc1MSA0NC4yMDYyIDEzLjE2NjdDNDQuMjA2MiAxNC44NTgzIDQzLjUyMTUgMTYuNDc4NSA0Mi4zMzMzIDE3LjY2NjdMMzcuMzMzMyAxMi42NjY3VjE3LjY2NjdMMzcuMzMzMyAxMi42NjY3WiIgZmlsbD0iI2IzYjNiYyIvPjxwYXRoIGQ9Ik0zMy4zMzMzIDguNjY2NjdMOCAzNEgxNEwzNy4zMzMzIDEyLjY2NjdMMzMuMzMzMyA4LjY2NjY3WiIgZmlsbD0iI2RjZGNkYyIvPjxyZWN0IHg9IjE0LjE0MjEiIHk9IjMwIiB3aWR0aD0iMTIiIGhlaWdodD0iNCIgdHJhbnNmb3JtPSJyb3RhdGUoLTQ1IDE0LjE0MjEgMzApIiBmaWxsPSIjODk1NzM0Ii8+PC9zdmc+'), crosshair;
+        }
+        .cake-2d {
+            position: relative;
+            width: 220px;
+            height: 200px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        }
+        .plate {
+            width: 260px; height: 15px; background-color: #e2e8f0;
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .cake-layer {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            width: 200px; border-radius: 8px; border: 2px solid #3c7aab;
+            background: linear-gradient(to bottom, #a0d2eb, #87ceeb);
+        }
+        .cake-layer::before { /* Icing piping */
+            content: ''; position: absolute; bottom: -8px; left: 0;
+            width: 100%; height: 12px;
+            background: radial-gradient(circle at 10px 0, transparent 0, transparent 5px, white 5px, white 10px);
+            background-size: 20px 10px; background-repeat: repeat-x;
+        }
+        .bottom-layer { height: 60px; bottom: 10px; }
+        .middle-layer { height: 60px; bottom: 70px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .top-layer { height: 60px; bottom: 130px; }
+        .icing {
+            position: absolute; left: 50%; transform: translateX(-50%); bottom: 120px;
+            width: 210px; height: 30px; background-color: #fff; border-radius: 50% / 15px;
+            border: 2px solid #3c7aab;
+        }
+        .pearl {
+            position: absolute; width: 8px; height: 8px; background-color: #f0e6ff; border-radius: 50%;
+            box-shadow: 0 0 5px #fff, 0 0 10px #d8b4fe;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px #fff, 0 0 10px #d8b4fe; } 50% { transform: scale(1.1); box-shadow: 0 0 8px #fff, 0 0 15px #d8b4fe; } }
+        .sprinkle {
+            position: absolute; width: 4px; height: 10px; border-radius: 2px;
+            top: -15px;
+        }
+        .candle {
+            position: absolute; width: 12px; height: 50px;
+            background: repeating-linear-gradient(45deg, #fce4ec, #fce4ec 5px, #f8bbd0 5px, #f8bbd0 10px);
+            border-radius: 5px 5px 0 0; top: -50px; left: 50%; transform: translateX(-50%);
+        }
+        .flame {
+            position: absolute; width: 14px; height: 22px; background: #fbbf24;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; top: -22px;
+            animation: flicker-strong 1.2s infinite; cursor: pointer; transition: opacity 0.3s, transform 0.3s;
+        }
+        @keyframes flicker-strong { 0%,100% {transform:scaleY(1) skewX(0); opacity:1;} 50% {transform:scaleY(0.95) skewX(2deg); opacity:0.9;} 75% {transform:scaleY(1.02) skewX(-2deg); opacity:1;} }
+        .flame.out { opacity: 0; transform: translateY(10px) scale(0.5); }
+        .smoke {
+            position: absolute; width: 10px; height: 10px; background: #ccc;
+            border-radius: 50%; top: -30px; opacity: 0;
+        }
+        .smoke.puff { animation: puff-out 1.5s ease-out forwards; }
+        @keyframes puff-out { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-30px) scale(2.5); opacity: 0; } }
+        
+        #slice-container {
+            position: absolute;
+            top: 112px; /* vertical center of cake */
+            left: 110px; /* horizontal center of cake */
+            width: 100px; /* half width of cake */
+            height: 1px;
+            transform-origin: left center;
+            z-index: 5;
+        }
+        .cake-slice, .cake-hole {
+            position: absolute;
+            width: 90px; height: 180px;
+            top: -90px; left: 0px; /* centers the slice vertically on the container */
+            clip-path: polygon(100% 0, 0 50%, 100% 100%);
+        }
+        .cake-hole {
+            background-color: #7ab8e4;
+            opacity: 0; transition: opacity 0.1s 0.2s; z-index: 1;
+        }
+        .cake-slice {
+            background-color: #87CEEB; border: 2px solid #3c7aab; box-sizing: border-box;
+            opacity: 0; transform-origin: center left;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); z-index: 2;
+        }
+        .slice-texture, .hole-texture {
+            position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.02) 50%, rgba(0,0,0,0.1));
+        }
+        .cake-hole.visible { opacity: 1; }
+        .cake-slice.cut { opacity: 1; transform: translateX(200px) translateY(-60px) rotate(25deg) scale(0.9); }
+        .particle {
+            position: absolute;
+            background-color: var(--particle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: burst 0.8s ease-out forwards;
+            z-index: 15;
+        }
+        @keyframes burst { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: var(--transform-end) scale(0); opacity: 0; } }
+        .balloon { position: fixed; bottom: -200px; width: 70px; height: 90px; border-radius: 50%; opacity: 0.8; animation: float-up 6s ease-in forwards; }
+        .balloon::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 2px; height: 20px; background-color: rgba(0,0,0,0.2); }
+        @keyframes float-up { to { bottom: 110vh; transform: scale(1.2); } }
+        
+        /* Starry Night Sky */
+        #starry-sky-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 2s ease-in-out;
+            z-index: 100;
+        }
+        #star-canvas {
+            position: absolute; top: 0; left: 0;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+        #starry-sky-container.visible { opacity: 1; pointer-events: auto; }
+        .universe-message {
+            color: white; font-size: 2.5rem; text-shadow: 0 0 15px #fff;
+            opacity: 0; transition: opacity 1.2s ease-in-out;
+            z-index: 110;
+        }
+        .universe-message.visible { opacity: 1; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen text-gray-800 p-4">
+
+    <audio id="birthdayAudio" src="your_audio_file.mp3" preload="auto"></audio>
+
+    <div id="balloon-container"></div>
+    <div id="envelope-container" class="flex flex-col items-center justify-center text-center">
+        <h1 class="font-playfair text-4xl md:text-6xl text-pink-500 mb-4">For my dearest Waru</h1>
+        <p class="text-lg text-gray-600 mb-8">A special message awaits you. Click the envelope to open it.</p>
+        <div id="envelope" class="cursor-pointer">
+            <div class="envelope-back"></div>
+            <div class="envelope-flap"></div>
+            <div class="heart">💌</div>
+        </div>
+    </div>
+
+    <div id="main-content" class="text-center transition-opacity duration-1000 opacity-1">
+        <div class="transition-opacity duration-1000" id="cake-scene">
+            <h1 class="font-playfair text-5xl md:text-7xl text-pink-500 mb-4">Happy Birthday, My Love!</h1>
+            <p class="text-lg md:text-2xl text-gray-600 mb-8">Wishing you the most wonderful day!</p>
+            <div class="cake-wrapper mb-8">
+                <canvas id="cutting-canvas"></canvas>
+                <div class="cake-2d">
+                    <div class="candle">
+                        <div class="flame"></div>
+                        <div class="smoke"></div>
+                    </div>
+                    <div class="icing">
+                        <div id="sprinkles-container"></div>
+                        <div id="pearls-container"></div>
+                    </div>
+                    <div class="cake-layer top-layer"></div>
+                    <div class="cake-layer middle-layer font-playfair">Waru</div>
+                    <div class="cake-layer bottom-layer"></div>
+                    <div id="slice-container">
+                        <div class="cake-hole"><div class="hole-texture"></div></div>
+                        <div class="cake-slice"><div class="slice-texture"></div></div>
+                    </div>
+                    <div class="plate"></div>
+                </div>
+            </div>
+            <p id="cake-instruction" class="text-gray-500 mb-6 italic">Make a wish & blow out the candle!</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="grab-knife-btn" class="px-8 py-3 bg-pink-500 text-white font-semibold rounded-full shadow-lg hover:bg-pink-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75 hidden">
+                    <span role="img" aria-label="knife">🔪</span> Grab the Knife
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="love-note-modal" class="fixed inset-0 w-full h-full items-center justify-center hidden z-50">
+        <div id="note-card" class="bg-white rounded-lg shadow-2xl p-8 max-w-lg w-11/12 mx-auto transform scale-90 opacity-0 transition-all duration-300">
+            <h2 class="font-playfair text-3xl text-rose-500 mb-4">My Dearest Waru,</h2>
+            <p class="text-gray-700 leading-relaxed mb-6">
+                From the moment you came into my life, you've painted my world in colors I never knew existed. Your laughter is my favorite song, and your smile is the brightest sunshine on any day. Today, as we celebrate you, I want to thank you for every shared dream, every quiet moment, and every bit of happiness you bring.
+            </p>
+             <p class="text-gray-700 leading-relaxed mb-6">
+                You are my greatest adventure and my calmest harbor. My love for you is immense, deeper than any ocean and vaster than any sky.
+            </p>
+            <p class="text-gray-700 leading-relaxed font-semibold">
+                Happy Birthday to the one who holds my heart. Forever yours.
+            </p>
+            <button id="close-note-btn" class="mt-8 px-6 py-2 bg-pink-500 text-white font-semibold rounded-full hover:bg-pink-600 transition">Close & See Your Surprise!</button>
+        </div>
+    </div>
+    
+    <div id="starry-sky-container">
+        <canvas id="star-canvas"></canvas>
+        <h2 class="universe-message font-playfair">You are my universe.</h2>
+    </div>
+
+    <canvas id="confetti-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-40"></canvas>
+
+    <script>
+        // --- DOM Elements ---
+        const envelopeContainer = document.getElementById('envelope-container');
+        const mainContent = document.getElementById('main-content');
+        const cakeScene = document.getElementById('cake-scene');
+        const loveNoteModal = document.getElementById('love-note-modal');
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const balloonContainer = document.getElementById('balloon-container');
+        const starrySkyContainer = document.getElementById('starry-sky-container');
+        const universeMessage = document.querySelector('.universe-message');
+        const starCanvas = document.getElementById('star-canvas');
+        const grabKnifeBtn = document.getElementById('grab-knife-btn');
+        const cakeInstruction = document.getElementById('cake-instruction');
+        const cakeWrapper = document.querySelector('.cake-wrapper');
+        const sliceContainer = document.getElementById('slice-container');
+        const cakeSlice = document.querySelector('.cake-slice');
+        const cakeHole = document.querySelector('.cake-hole');
+        const flame = document.querySelector('.flame');
+        const smoke = document.querySelector('.smoke');
+        const cuttingCanvas = document.getElementById('cutting-canvas');
+        const birthdayAudio = document.getElementById('birthdayAudio');
+
+        mainContent.classList.add('hidden', 'opacity-0'); // Initially hide main content
+
+        // --- Confetti Logic ---
+        const confettiCtx = confettiCanvas.getContext('2d');
+        confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight;
+        let confettiPieces = []; let animationFrameId;
+        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800'];
+        function createConfetti() { confettiPieces = Array.from({ length: 200 }, () => ({ x: Math.random() * confettiCanvas.width, y: -Math.random() * confettiCanvas.height, radius: Math.random() * 5 + 2, color: colors[Math.floor(Math.random() * colors.length)], speed: Math.random() * 3 + 2, angle: Math.random() * 360, tilt: Math.random() * 10 - 5, })); }
+        function drawConfetti() { confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiPieces.forEach(p => { confettiCtx.beginPath(); confettiCtx.lineWidth = p.radius / 2; confettiCtx.strokeStyle = p.color; confettiCtx.moveTo(p.x + p.tilt, p.y); confettiCtx.lineTo(p.x, p.y + p.tilt + p.radius); confettiCtx.stroke(); p.y += p.speed; p.angle += 0.1; p.x += Math.sin(p.angle); if (p.y > confettiCanvas.height) { p.x = Math.random() * confettiCanvas.width; p.y = -20; } }); animationFrameId = requestAnimationFrame(drawConfetti); }
+
+        // --- Initial Flow: Envelope -> Note -> Cake ---
+        document.getElementById('envelope').addEventListener('click', (e) => { 
+            e.currentTarget.classList.add('open'); 
+            setTimeout(() => { 
+                loveNoteModal.classList.remove('hidden'); 
+                loveNoteModal.classList.add('flex'); 
+                setTimeout(() => document.getElementById('note-card').classList.replace('scale-90', 'scale-100'), 10); 
+                setTimeout(() => document.getElementById('note-card').classList.replace('opacity-0', 'opacity-100'), 10); 
+                birthdayAudio.play().catch(error => console.log("Audio autoplay prevented by browser."));
+                createConfetti(); 
+                drawConfetti(); 
+            }, 600); 
+        });
+        document.getElementById('close-note-btn').addEventListener('click', () => { 
+            document.getElementById('note-card').classList.replace('scale-100', 'scale-90'); 
+            document.getElementById('note-card').classList.replace('opacity-100', 'opacity-0'); 
+            setTimeout(() => { 
+                loveNoteModal.classList.add('hidden'); 
+                loveNoteModal.classList.remove('flex'); 
+                cancelAnimationFrame(animationFrameId); 
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); 
+                envelopeContainer.classList.add('hidden'); 
+                mainContent.classList.remove('hidden'); 
+                setTimeout(() => mainContent.classList.remove('opacity-0'), 50); 
+            }, 300); 
+        });
+        
+        // --- Cake UX Flow ---
+        let isCandleOut = false;
+        flame.addEventListener('click', () => {
+            if (isCandleOut) return;
+            isCandleOut = true;
+            flame.classList.add('out');
+            smoke.classList.add('puff');
+            setTimeout(() => {
+                grabKnifeBtn.classList.remove('hidden');
+                cakeInstruction.textContent = 'Cut from the edge to the center!';
+            }, 1000);
+        });
+
+        // --- Realistic Cake Cutting Logic ---
+        const cuttingCtx = cuttingCanvas.getContext('2d');
+        let isCutting = false; let isCuttingMode = false; let cutStart = { x: 0, y: 0 };
+        function resizeCuttingCanvas() { const rect = cakeWrapper.getBoundingClientRect(); cuttingCanvas.width = rect.width; cuttingCanvas.height = rect.height; }
+        resizeCuttingCanvas();
+        grabKnifeBtn.addEventListener('click', () => { isCuttingMode = true; grabKnifeBtn.classList.add('hidden'); cakeInstruction.textContent = 'Click and drag from the edge to the center...'; document.body.classList.add('knife-cursor'); cuttingCanvas.style.pointerEvents = 'auto'; });
+        const getCoords = (e) => { const rect = cuttingCanvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; };
+        const startCut = (e) => { if (!isCuttingMode) return; isCutting = true; cutStart = getCoords(e); };
+        const drawCut = (e) => { if (!isCutting || !isCuttingMode) return; const currentPos = getCoords(e); cuttingCtx.clearRect(0, 0, cuttingCanvas.width, cuttingCanvas.height); cuttingCtx.beginPath(); cuttingCtx.moveTo(cutStart.x, cutStart.y); cuttingCtx.lineTo(currentPos.x, currentPos.y); cuttingCtx.strokeStyle = 'rgba(0,0,0,0.5)'; cuttingCtx.lineWidth = 3; cuttingCtx.setLineDash([5, 5]); cuttingCtx.stroke(); };
+        const endCut = (e) => { 
+            if (!isCutting || !isCuttingMode) return; 
+            isCutting = false; 
+            cuttingCtx.clearRect(0, 0, cuttingCanvas.width, cuttingCanvas.height); 
+            document.body.classList.remove('knife-cursor'); 
+            cuttingCanvas.style.pointerEvents = 'none'; 
+            isCuttingMode = false;
+            
+            // Calculate angle
+            const endPos = getCoords(e);
+            const centerX = cuttingCanvas.width / 2;
+            const centerY = cuttingCanvas.height / 2;
+            const angle = Math.atan2(endPos.y - centerY, endPos.x - centerX) * (180 / Math.PI);
+            sliceContainer.style.transform = `rotate(${angle}deg)`;
+
+            // Celebration
+            createParticleBurst(centerX, centerY);
+            cakeSlice.classList.add('cut'); 
+            cakeHole.classList.add('visible'); 
+            createBalloons();
+            cakeInstruction.textContent = 'Happy Birthday! 🎉';
+            
+            // Transition to starry night
+            setTimeout(() => {
+                cakeScene.style.opacity = '0';
+                starrySkyContainer.classList.add('visible');
+                animateStars();
+            }, 2500); 
+        };
+        ['mousedown', 'touchstart'].forEach(evt => cuttingCanvas.addEventListener(evt, startCut));
+        ['mousemove', 'touchmove'].forEach(evt => cuttingCanvas.addEventListener(evt, drawCut));
+        ['mouseup', 'touchend'].forEach(evt => cuttingCanvas.addEventListener(evt, endCut));
+        cuttingCanvas.addEventListener('mouseleave', () => { if(isCutting) endCut(new MouseEvent('mouseup')); });
+
+        // --- Starry Night Logic ---
+        const starCtx = starCanvas.getContext('2d');
+        let stars = []; let shootingStars = []; let shootingStarInterval = null;
+        let animationFrameIdStars; let progress = 0; let isMessageSequenceTriggered = false;
+        const heartPoints = [ {x:0.5, y:0.4}, {x:0.65, y:0.3}, {x:0.75, y:0.35}, {x:0.8, y:0.45}, {x:0.8, y:0.55}, {x:0.7, y:0.65}, {x:0.5, y:0.8}, {x:0.3, y:0.65}, {x:0.2, y:0.55}, {x:0.2, y:0.45}, {x:0.25, y:0.35}, {x:0.35, y:0.3}, {x:0.5, y:0.4} ];
+        function resizeStarCanvas() { starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight; stars = Array.from({length: 300}, () => ({ x: Math.random() * starCanvas.width, y: Math.random() * starCanvas.height, radius: Math.random() * 1.5, alpha: Math.random(), dy: Math.random() > 0.5 ? 0.05 : -0.05 })); }
+        function createShootingStar() { const fromTop = Math.random() > 0.5; shootingStars.push({ x: fromTop ? Math.random() * starCanvas.width * 0.8 + (starCanvas.width * 0.1) : starCanvas.width + 100, y: fromTop ? -100 : Math.random() * starCanvas.height * 0.6, len: Math.random() * 80 + 50, speed: Math.random() * 5 + 5, alpha: 1, }); }
+        function drawAndUpdateShootingStars() { shootingStars.forEach((ss, index) => { const gradient = starCtx.createLinearGradient(ss.x, ss.y, ss.x - ss.len, ss.y + ss.len * 0.5); gradient.addColorStop(0, `rgba(255, 255, 255, ${ss.alpha})`); gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); starCtx.strokeStyle = gradient; starCtx.lineWidth = 2; starCtx.beginPath(); starCtx.moveTo(ss.x, ss.y); starCtx.lineTo(ss.x - ss.len, ss.y + ss.len * 0.5); starCtx.stroke(); ss.x -= ss.speed; ss.y += ss.speed * 0.5; ss.alpha -= 0.02; if (ss.alpha <= 0) shootingStars.splice(index, 1); }); }
+        function drawStars() {
+            starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+            stars.forEach(star => { starCtx.beginPath(); starCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2); starCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`; starCtx.fill(); star.alpha += star.dy; if (star.alpha <= 0.1 || star.alpha >= 1) star.dy *= -1; });
+            starCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; starCtx.lineWidth = 2; starCtx.shadowBlur = 10; starCtx.shadowColor = 'white';
+            const totalLength = heartPoints.length - 1; const currentLength = totalLength * progress;
+            for (let i = 0; i < Math.floor(currentLength); i++) { starCtx.beginPath(); starCtx.moveTo(heartPoints[i].x * starCanvas.width, heartPoints[i].y * starCanvas.height); starCtx.lineTo(heartPoints[i+1].x * starCanvas.width, heartPoints[i+1].y * starCanvas.height); starCtx.stroke(); }
+            if (progress < 1) { progress += 0.01; }
+            if (progress >= 1 && !isMessageSequenceTriggered) {
+                isMessageSequenceTriggered = true;
+                universeMessage.classList.add('visible');
+                setTimeout(() => { universeMessage.classList.remove('visible'); }, 4000);
+                setTimeout(() => { universeMessage.textContent = 'I love you forever'; universeMessage.classList.add('visible'); }, 5500);
+                setTimeout(() => { if (shootingStarInterval) clearInterval(shootingStarInterval); shootingStarInterval = setInterval(createShootingStar, 1000); }, 6000);
+            }
+            drawAndUpdateShootingStars();
+            animationFrameIdStars = requestAnimationFrame(drawStars);
+        }
+        function animateStars() { resizeStarCanvas(); drawStars(); }
+
+        // --- Brilliant Cake Effects ---
+        const particleColors = ['#f9a8d4', '#f472b6', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6'];
+        function createParticleBurst(x, y) {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.setProperty('--particle-color', particleColors[Math.floor(Math.random() * particleColors.length)]);
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 80 + 50;
+                const endX = Math.cos(angle * Math.PI / 180) * distance;
+                const endY = Math.sin(angle * Math.PI / 180) * distance;
+                particle.style.setProperty('--transform-end', `translate(${endX}px, ${endY}px)`);
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.top = `${y}px`;
+                particle.style.left = `${x}px`;
+                cakeWrapper.appendChild(particle);
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+        const balloonColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef'];
+        function createBalloons() { for (let i = 0; i < 15; i++) { const balloon = document.createElement('div'); balloon.className = 'balloon'; const color = balloonColors[Math.floor(Math.random() * balloonColors.length)]; balloon.style.background = `radial-gradient(circle at 65% 35%, white 1px, ${color} 4%, ${color})`; balloon.style.left = `${Math.random() * 100}vw`; balloon.style.animationDuration = `${Math.random() * 3 + 4}s`; balloonContainer.appendChild(balloon); setTimeout(() => balloon.remove(), 7000); } }
+        function createCakeDecorations() {
+            const sprinklesContainer = document.getElementById('sprinkles-container');
+            const pearlsContainer = document.getElementById('pearls-container');
+            const sprinkleColors = ['#ea580c', '#db2777', '#7c3aed', '#16a34a', '#2563eb'];
+            for(let i = 0; i < 50; i++) {
+                const sprinkle = document.createElement('div'); sprinkle.className = 'sprinkle';
+                sprinkle.style.backgroundColor = sprinkleColors[Math.floor(Math.random() * sprinkleColors.length)];
+                sprinkle.style.left = `${Math.random() * 90 + 5}%`;
+                sprinkle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                sprinklesContainer.appendChild(sprinkle);
+            }
+            const pearlPositions = [ {left: '15%', top: '5px'}, {left: '35%', top: '-2px'}, {left: '55%', top: '5px'}, {left: '75%', top: '-2px'} ];
+            pearlPositions.forEach(pos => {
+                const pearl = document.createElement('div'); pearl.className = 'pearl';
+                pearl.style.left = pos.left; pearl.style.top = pos.top;
+                pearlsContainer.appendChild(pearl);
+            });
+        }
+        createCakeDecorations();
+
+        // --- Window Resize Listener ---
+        window.addEventListener('resize', () => { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; resizeCuttingCanvas(); if (starrySkyContainer.classList.contains('visible')) resizeStarCanvas(); });
+    </script>
+</body>
+</html>
+
